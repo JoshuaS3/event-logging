@@ -10,28 +10,34 @@ namespace EventLogging
     public class EventData
     {
 
-        static int NumberOfEvents = 0;
+        private static bool _initiated = false;
+        private static DateTime _initTimestamp;
+
+        private static string _headerBlock = "Instant Gameworks (c)  2018\nThread Start: {0} {1}\n";
+
+        public static int NumberOfEvents = 0;
         
-        interface IEvent
+        private interface IEvent
         {
             int Count { get; }
             DateTime Timestamp { get; }
         }
 
-        public class MessageEvent : IEvent
+        private class MessageEvent : IEvent
         {
             public int Count { get; }
             public DateTime Timestamp { get; }
             public string Message;
-            MessageEvent(string messagePass)
+            public MessageEvent(string messagePass)
             {
-                Count = NumberOfEvents++;
+                Count = ++NumberOfEvents;
                 Timestamp = DateTime.Now;
+
                 Message = messagePass;
             }
         }
 
-        public class ErrorEvent : IEvent
+        private class ErrorEvent : IEvent
         {
             public int Count { get; set; }
             public DateTime Timestamp { get; }
@@ -40,8 +46,11 @@ namespace EventLogging
             public Exception Exception { get; }
             public StackTrace StackTrace { get; }
 
-            ErrorEvent(TraceSource source, Exception e, StackTrace trace)
+            public ErrorEvent(TraceSource source, Exception e, StackTrace trace)
             {
+                Count = ++NumberOfEvents;
+                Timestamp = DateTime.Now;
+
                 TraceSource = source;
                 Exception = e;
                 StackTrace = trace;
@@ -50,14 +59,24 @@ namespace EventLogging
         }
 
 
-        public List<MessageEvent> MessageEvents = new List<MessageEvent>();
-        public List<ErrorEvent> ErrorEvents = new List<ErrorEvent>();
+        private static List<MessageEvent> MessageEvents = new List<MessageEvent>();
+        private static List<ErrorEvent> ErrorEvents = new List<ErrorEvent>();
 
 
-
-        public void Message(string m)
+        private static void _initiate()
         {
+            _initiated = true;
+            _initTimestamp = DateTime.Now;
+            Console.WriteLine(string.Format(_headerBlock, _initTimestamp.ToShortDateString(), _initTimestamp.ToLongTimeString()));
+        }
 
+        public static void Message(string m)
+        {
+            if (!_initiated) _initiate();
+
+            MessageEvent newMessage = new MessageEvent(m);
+            Console.WriteLine(String.Format("[{0}] {1}:{2:00}:{3:00}.{4:000} - {5}", newMessage.Count, newMessage.Timestamp.Hour, newMessage.Timestamp.Minute, newMessage.Timestamp.Second, newMessage.Timestamp.Millisecond, newMessage.Message));
+            MessageEvents.Add(newMessage);
         }
 
 
