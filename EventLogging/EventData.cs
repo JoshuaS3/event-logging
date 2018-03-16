@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace EventLogging
 {
@@ -35,6 +36,10 @@ namespace EventLogging
 
                 Message = messagePass;
             }
+            public override string ToString()
+            {
+                return string.Format("[{0}] {1}:{2:00}:{3:00}.{4:000} - {5}", Count, Timestamp.Hour, Timestamp.Minute, Timestamp.Second, Timestamp.Millisecond, Message);
+            }
         }
 
         private class ErrorEvent : IEvent
@@ -42,20 +47,24 @@ namespace EventLogging
             public int Count { get; set; }
             public DateTime Timestamp { get; }
 
-            public TraceSource TraceSource { get; }
-            public Exception Exception { get; }
-            public StackTrace StackTrace { get; }
+            public string TraceSource { get; }
+            public string Exception { get; }
+            public string StackTrace { get; }
 
-            public ErrorEvent(TraceSource source, Exception e, StackTrace trace)
+            public ErrorEvent(string message, string source, string trace)
             {
                 Count = ++NumberOfEvents;
                 Timestamp = DateTime.Now;
 
                 TraceSource = source;
-                Exception = e;
+                Exception = message;
                 StackTrace = trace;
             }
 
+            public override string ToString()
+            {
+                return string.Format("[{0}] {1}:{2:00}:{3:00}.{4:000} - {6}: \n{5}\n\n{7}", Count, Timestamp.Hour, Timestamp.Minute, Timestamp.Second, Timestamp.Millisecond, Exception, TraceSource, StackTrace);
+            }
         }
 
 
@@ -77,6 +86,37 @@ namespace EventLogging
             MessageEvent newMessage = new MessageEvent(m);
             Console.WriteLine(String.Format("[{0}] {1}:{2:00}:{3:00}.{4:000} - {5}", newMessage.Count, newMessage.Timestamp.Hour, newMessage.Timestamp.Minute, newMessage.Timestamp.Second, newMessage.Timestamp.Millisecond, newMessage.Message));
             MessageEvents.Add(newMessage);
+        }
+
+        public static void Error(Exception e)
+        {
+            if (!_initiated) _initiate();
+
+            ErrorEvent newMessage = new ErrorEvent(e.Message, e.Source, e.StackTrace);
+            Console.WriteLine(String.Format("[{0}] {1}:{2:00}:{3:00}.{4:000} - {6}: \n{5}\n\n{7}", newMessage.Count, newMessage.Timestamp.Hour, newMessage.Timestamp.Minute, newMessage.Timestamp.Second, newMessage.Timestamp.Millisecond, newMessage.Exception, newMessage.TraceSource, newMessage.StackTrace));
+            ErrorEvents.Add(newMessage);
+        }
+
+        public static void WriteEvents()
+        {
+
+            Directory.CreateDirectory("EventLogging");
+            string formattedTime = string.Format("{0}-{1}-{2}--{3}-{4}-{5}.{6}", _initTimestamp.Year, _initTimestamp.Month, _initTimestamp.Day, _initTimestamp.Hour, _initTimestamp.Minute, _initTimestamp.Second, _initTimestamp.Millisecond);
+            FileStream eventFile = new FileStream(string.Format(@"EventLogging\{0}.txt", formattedTime), FileMode.Create, FileAccess.Write, FileShare.None);
+            TextWriter writer = new StreamWriter(eventFile);
+
+            writer.WriteLine(string.Format(_headerBlock, _initTimestamp.ToShortDateString(), _initTimestamp.ToLongTimeString()));
+
+            for (int currentEventNumber = 0; currentEventNumber < (NumberOfEvents - 1); currentEventNumber++)
+            {
+                writer.Write(MessageEvents[currentEventNumber]);
+                writer.WriteLine();
+            }
+            writer.WriteLine(ErrorEvents[0]);
+
+            writer.Close();
+            eventFile.Close();
+
         }
 
 
