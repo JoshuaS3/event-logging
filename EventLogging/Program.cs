@@ -11,6 +11,14 @@ namespace EventLogging
 {
     class Program
     {
+        static void a()
+        {
+            throw new Exception(" should not happen.");
+        }
+        static void test()
+        {
+            a();
+        }
         static void Main(string[] args)
         {
             EventData.Message("Hello, World!");
@@ -19,7 +27,7 @@ namespace EventLogging
             Thread.Sleep(260);
             try
             {
-                throw new Exception();
+                test();
             }
             catch (Exception e)
             {

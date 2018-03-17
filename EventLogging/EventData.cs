@@ -63,7 +63,7 @@ namespace EventLogging
 
             public override string ToString()
             {
-                return string.Format("[{0}] {1}:{2:00}:{3:00}.{4:000} - {6}: \n{5}\n\n{7}", Count, Timestamp.Hour, Timestamp.Minute, Timestamp.Second, Timestamp.Millisecond, Exception, TraceSource, StackTrace);
+                return string.Format("[{0}] {1}:{2:00}:{3:00}.{4:000} - {6}: {5}\r\n{7}", Count, Timestamp.Hour, Timestamp.Minute, Timestamp.Second, Timestamp.Millisecond, Exception, TraceSource, StackTrace);
             }
         }
 
@@ -93,7 +93,7 @@ namespace EventLogging
             if (!_initiated) _initiate();
 
             ErrorEvent newMessage = new ErrorEvent(e.Message, e.Source, e.StackTrace);
-            Console.WriteLine(String.Format("[{0}] {1}:{2:00}:{3:00}.{4:000} - {6}: \n{5}\n\n{7}", newMessage.Count, newMessage.Timestamp.Hour, newMessage.Timestamp.Minute, newMessage.Timestamp.Second, newMessage.Timestamp.Millisecond, newMessage.Exception, newMessage.TraceSource, newMessage.StackTrace));
+            Console.WriteLine(String.Format("[{0}] {1}:{2:00}:{3:00}.{4:000} - {6}: {5}\n{7}", newMessage.Count, newMessage.Timestamp.Hour, newMessage.Timestamp.Minute, newMessage.Timestamp.Second, newMessage.Timestamp.Millisecond, newMessage.Exception, newMessage.TraceSource, newMessage.StackTrace));
             ErrorEvents.Add(newMessage);
         }
 
@@ -101,7 +101,7 @@ namespace EventLogging
         {
 
             Directory.CreateDirectory("EventLogging");
-            string formattedTime = string.Format("{0}-{1}-{2}--{3}-{4}-{5}.{6}", _initTimestamp.Year, _initTimestamp.Month, _initTimestamp.Day, _initTimestamp.Hour, _initTimestamp.Minute, _initTimestamp.Second, _initTimestamp.Millisecond);
+            string formattedTime = string.Format("{0}{1:00}{2:00}{3:00}{4:00}{5:00}.{6:000}", _initTimestamp.Year, _initTimestamp.Month, _initTimestamp.Day, _initTimestamp.Hour, _initTimestamp.Minute, _initTimestamp.Second, _initTimestamp.Millisecond);
             FileStream eventFile = new FileStream(string.Format(@"EventLogging\{0}.txt", formattedTime), FileMode.Create, FileAccess.Write, FileShare.None);
             TextWriter writer = new StreamWriter(eventFile);
 
@@ -109,8 +109,7 @@ namespace EventLogging
 
             for (int currentEventNumber = 0; currentEventNumber < (NumberOfEvents - 1); currentEventNumber++)
             {
-                writer.Write(MessageEvents[currentEventNumber]);
-                writer.WriteLine();
+                writer.WriteLine(MessageEvents[currentEventNumber]);//.ToString().Replace(@"\r\n", Environment.NewLine));
             }
             writer.WriteLine(ErrorEvents[0]);
 
