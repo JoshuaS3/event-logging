@@ -14,7 +14,7 @@ namespace EventLogging
         private static bool _initiated = false;
         private static DateTime _initTimestamp;
 
-        private static string _headerBlock = "Instant Gameworks (c)  2018\nThread Start: {0} {1}\n";
+        private static string _headerBlock = "Instant Gameworks (c)  2018\r\nThread Start: {0} {1}\r\n";
 
         public static int NumberOfEvents = 0;
         
@@ -101,15 +101,15 @@ namespace EventLogging
         {
 
             Directory.CreateDirectory("EventLogging");
-            string formattedTime = string.Format("{0}{1:00}{2:00}{3:00}{4:00}{5:00}.{6:000}", _initTimestamp.Year, _initTimestamp.Month, _initTimestamp.Day, _initTimestamp.Hour, _initTimestamp.Minute, _initTimestamp.Second, _initTimestamp.Millisecond);
-            FileStream eventFile = new FileStream(string.Format(@"EventLogging\{0}.txt", formattedTime), FileMode.Create, FileAccess.Write, FileShare.None);
+            string formattedTime = string.Format("{0}-{1:00}-{2:00} {3:00}꞉{4:00}꞉{5:00}.{6:000}", _initTimestamp.Year, _initTimestamp.Month, _initTimestamp.Day, _initTimestamp.Hour, _initTimestamp.Minute, _initTimestamp.Second, _initTimestamp.Millisecond);
+            FileStream eventFile = new FileStream(string.Format(@"EventLogging\{0}.log", formattedTime), FileMode.Create, FileAccess.Write, FileShare.None);
             TextWriter writer = new StreamWriter(eventFile);
 
             writer.WriteLine(string.Format(_headerBlock, _initTimestamp.ToShortDateString(), _initTimestamp.ToLongTimeString()));
 
             for (int currentEventNumber = 0; currentEventNumber < (NumberOfEvents - 1); currentEventNumber++)
             {
-                writer.WriteLine(MessageEvents[currentEventNumber]);//.ToString().Replace(@"\r\n", Environment.NewLine));
+                writer.WriteLine(MessageEvents[currentEventNumber]);
             }
             writer.WriteLine(ErrorEvents[0]);
 
