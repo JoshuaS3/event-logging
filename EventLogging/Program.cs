@@ -21,20 +21,7 @@ namespace EventLogging
         }
         static void Main(string[] args)
         {
-            EventData.Message("Hello, World!");
-            Thread.Sleep(500);
-            EventData.Message("500 milliseconds later...");
-            Thread.Sleep(260);
-            try
-            {
-                test();
-            }
-            catch (Exception e)
-            {
-                EventData.Error(e);
-            }
-
-            EventData.WriteEvents();
+            LogForm.InitializeWindow();
         }
     }
 }
