@@ -17,7 +17,7 @@ namespace EventLogging
         private static string _headerBlock = "Instant Gameworks (c)  2018\r\nThread Start: {0} {1}\r\n";
 
         public static int NumberOfEvents = 0;
-        
+
         private interface IEvent
         {
             int Count { get; }

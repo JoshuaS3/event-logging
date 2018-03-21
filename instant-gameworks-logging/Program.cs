@@ -11,17 +11,9 @@ namespace EventLogging
 {
     class Program
     {
-        static void a()
-        {
-            throw new Exception(" should not happen.");
-        }
-        static void test()
-        {
-            a();
-        }
         static void Main(string[] args)
         {
-            LogForm.InitializeWindow();
+
         }
     }
 }
